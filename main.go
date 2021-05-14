@@ -120,7 +120,7 @@ func emojImage(img io.Reader) (string, error) {
 		for x := 0; x < 20; x++ {
 			c := resized.At(x, y)
 			r, g, b, a := c.RGBA()
-			if a == 0 {
+			if a < 16384 {
 				message += ":blank:"
 				continue
 			}
