@@ -125,8 +125,7 @@ func emojImage(img io.Reader) (string, error) {
 				continue
 			}
 
-			message += fmt.Sprintf(":color_%d_%d_%d:", int(math.Round(float64(r)/13107)), int(math.Round(float64(g)/13107)), int(math.Round(float64(b)/13107)))
-			// fmt.Printf("%v, %v, %v\n", r, g, b)
+			message += fmt.Sprintf(":%02d%02d%02d:", int(math.Round(float64(r)/6553.5)), int(math.Round(float64(g)/6553.5)), int(math.Round(float64(b)/6553.5)))
 		}
 
 		message += "\n"

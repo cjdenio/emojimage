@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"image"
@@ -13,39 +14,39 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
-	"os"
+	"time"
 )
 
 func main() {
-	for r := 0; r <= 5; r++ {
-		for g := 0; g <= 5; g++ {
-			for b := 0; b <= 5; b++ {
-				if r < 3 || (g < 1 && r == 3) || (b < 4 && g == 1 && r == 3) {
-					continue
-				}
+	r := 0
+	g := 0
+	b := 0
 
+	for r <= 10 {
+		for g <= 10 {
+			for b <= 10 {
 				fmt.Printf("Trying %d-%d-%d...\n", r, g, b)
+				fmt.Println("Generating image...")
+				defer fmt.Println("")
 
-				f, err := os.Open(fmt.Sprintf("img/%d%d%d.png", r, g, b))
+				i := genImage(color.RGBA{uint8(float32(r) * 25.5), uint8(float32(g) * 25.5), uint8(float32(b) * 25.5), 255})
+				resp, err := uploadEmoji(fmt.Sprintf("%02d%02d%02d", r, g, b), bytes.NewReader(i))
+				fmt.Println(resp)
 				if err != nil {
-					fmt.Println("skipping")
+					fmt.Printf("Failed on %d-%d-%d, waiting 10 seconds... \n", r, g, b)
+					time.Sleep(10 * time.Second)
 					continue
 				}
 
-				result, err := uploadEmoji(fmt.Sprintf("color_%d_%d_%d", r, g, b), f)
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				fmt.Println(result)
-
-				// i := genImage(color.RGBA{uint8(r * 51), uint8(g * 51), uint8(b * 51), 255})
-				// err := os.WriteFile(fmt.Sprintf("img/%d%d%d.png", r, g, b), i, 0777)
-				// if err != nil {
-				// 	log.Fatal(err)
-				// }
+				b++
 			}
+
+			b = 0
+			g++
 		}
+
+		g = 0
+		r++
 	}
 }
 
@@ -80,7 +81,13 @@ func uploadEmoji(name string, data io.Reader) (string, error) {
 
 	body, _ := io.ReadAll(resp.Body)
 
-	if resp.StatusCode != 200 {
+	var parsed struct {
+		Ok bool `json:"ok"`
+	}
+
+	json.Unmarshal(body, &parsed)
+
+	if resp.StatusCode != 200 || !parsed.Ok {
 		return string(body), errors.New("uh oh")
 	}
 
