@@ -36,6 +36,11 @@ func main() {
 		var payload EventPayload
 		c.BindJSON(&payload)
 
+		if payload.Type == "url_verification" {
+			c.String(200, payload.Challenge)
+			return
+		}
+
 		c.String(200, "")
 
 		if payload.Event.Channel != CHANNEL {
