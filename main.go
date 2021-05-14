@@ -99,6 +99,8 @@ func main() {
 			reportErr(err.Error())
 			return
 		}
+
+		client.PostMessage(CHANNEL, slack.MsgOptionText(image, false), slack.MsgOptionTS(share.Ts))
 	})
 
 	r.Run("0.0.0.0:3000")
