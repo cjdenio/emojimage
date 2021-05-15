@@ -14,10 +14,21 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 )
 
 func main() {
+	// upload :blank:
+	blank := genImage(color.RGBA{0, 0, 0, 0})
+	_, err := uploadEmoji("blank", bytes.NewReader(blank))
+	if err != nil {
+		fmt.Println("ERROR uploading :blank:! Script will continue in 10 seconds...")
+		time.Sleep(10 * time.Second)
+	} else {
+		fmt.Println("Successfully uploaded :blank:")
+	}
+
 	r := 0
 	g := 0
 	b := 0
@@ -27,7 +38,6 @@ func main() {
 			for b <= 10 {
 				fmt.Printf("Trying %d-%d-%d...\n", r, g, b)
 				fmt.Println("Generating image...")
-				defer fmt.Println("")
 
 				i := genImage(color.RGBA{uint8(float32(r) * 25.5), uint8(float32(g) * 25.5), uint8(float32(b) * 25.5), 255})
 				resp, err := uploadEmoji(fmt.Sprintf("%02d%02d%02d", r, g, b), bytes.NewReader(i))
@@ -57,7 +67,7 @@ func uploadEmoji(name string, data io.Reader) (string, error) {
 	go func() {
 		w.WriteField("name", name)
 		w.WriteField("mode", "data")
-		w.WriteField("token", "TOKEN")
+		w.WriteField("token", os.Getenv("SLACK_TOKEN"))
 
 		fw, _ := w.CreateFormFile("image", "test.png")
 		io.Copy(fw, data)

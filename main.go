@@ -1,17 +1,14 @@
 package main
 
 import (
+	"emojimage/pkg"
 	"fmt"
-	"image/png"
-	"io"
 	"log"
-	"math"
 	"net/http"
 	"net/url"
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/nfnt/resize"
 	"github.com/slack-go/slack"
 )
 
@@ -83,7 +80,7 @@ func main() {
 			return
 		}
 
-		image, err := emojImage(resp.Body)
+		image, err := pkg.GenerateImage(resp.Body, 20)
 		if err != nil {
 			reportErr(err.Error())
 			return
@@ -104,32 +101,4 @@ func main() {
 	})
 
 	r.Run("0.0.0.0:3000")
-}
-
-func emojImage(img io.Reader) (string, error) {
-	src, err := png.Decode(img)
-	if err != nil {
-		return "", nil
-	}
-
-	resized := resize.Resize(20, 20, src, resize.NearestNeighbor)
-
-	message := ""
-
-	for y := 0; y < 20; y++ {
-		for x := 0; x < 20; x++ {
-			c := resized.At(x, y)
-			r, g, b, a := c.RGBA()
-			if a < 16384 {
-				message += ":blank:"
-				continue
-			}
-
-			message += fmt.Sprintf(":%02d%02d%02d:", int(math.Round(float64(r)/6553.5)), int(math.Round(float64(g)/6553.5)), int(math.Round(float64(b)/6553.5)))
-		}
-
-		message += "\n"
-	}
-
-	return message, nil
 }
