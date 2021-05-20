@@ -76,7 +76,7 @@ func uploadEmoji(name string, data io.Reader) (string, error) {
 		pw.Close()
 	}()
 
-	u, _ := url.Parse("https://hackclub.slack.com/api/emoji.add")
+	u, _ := url.Parse("https://slack.com/api/emoji.add")
 	resp, err := http.DefaultClient.Do(&http.Request{
 		Method: http.MethodPost,
 		URL:    u,
